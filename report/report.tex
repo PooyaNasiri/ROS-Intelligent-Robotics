@@ -1,0 +1,160 @@
+\documentclass[a4paper]{article}
+\usepackage[left=2cm,right=2cm,top=2cm,bottom=2cm]{geometry}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{color}
+
+\title{Intelligent Robotics Assignments Report}
+\author{Pooya Nasiri \thanks{Email: pooya.nasiri@studenti.unipd.it | Matricola 2071437},  
+Arash Abdolhossein Pour Malekshah \thanks{Email: arash.abdolhosseinpourmalekshah@studenti.unipd.it | Matricola 2080671}}
+\date{June 27, 2024}
+
+\begin{document}
+
+\maketitle
+
+\section*{GROUP 43}
+\begin{itemize}
+    \item Pooya Nasiri \\
+    Email: \href{mailto:pooya.nasiri@studenti.unipd.it}{pooya.nasiri@studenti.unipd.it} \\
+    Arash Abdolhossein Pour Malekshah \\
+    Email: \href{mailto:arash.abdolhosseinpourmalekshah@studenti.unipd.it}{arash.abdolhosseinpourmalekshah@studenti.unipd.it}
+    
+    \item Bitbucket repository: \\
+    \url{https://bitbucket.org/ir2324-group-43/ir2324_group_43/}
+    \item Google Drive folder: \\
+    \url{https://drive.google.com/drive/u/0/folders/1xXpOcEI8CoQ80vXw3xNiskqTXxp1L2BJ}
+\end{itemize}
+\section{Introduction}
+
+In this project, we developed a multi-node ROS application for guiding a robotic platform through navigation, object detection, and manipulation tasks. The system consists of three primary nodes:
+
+\begin{itemize}
+    \item \textbf{nodeA.cpp}: Responsible for navigation and obstacle avoidance.
+    \item \textbf{nodeB.cpp}: Focuses on object detection using AprilTags.
+    \item \textbf{nodeC.cpp}: Handles object manipulation and placement.
+\end{itemize}
+
+Two launch files simplify system execution: \texttt{mylaunch.launch} and \texttt{launch nodes.launch}.
+
+\subsection{Project Objectives}
+
+Objectives include developing navigation, object detection, and manipulation systems, ensuring seamless node communication via ROS.
+
+\subsection{System Architecture}
+
+Modular architecture enhances code clarity and maintainability, with each node performing distinct tasks.
+
+\subsection{Implementation Overview}
+
+Steps involved adaptation of existing code, development of custom services, integration of MoveIt!, and utilization of AprilTags.
+
+\section{Node A: Navigation and Obstacle Avoidance}
+
+The primary objective of \texttt{nodeA.cpp} is to guide the robot to a specific pose in front of the table using custom services and action clients for navigation and obstacle avoidance.
+
+\subsection{Service Client for Obstacle Detection}
+
+\texttt{nodeA.cpp} includes a custom \texttt{ServiceClient} that communicates with \texttt{tiago\_iaslab\_simulation::ObstacleDetectionAction} for dynamic obstacle management.
+
+\subsection{Navigating Around Obstacles}
+
+Challenges like navigating around a cylindrical obstacle are addressed using partial pose adjustments.
+
+\subsection{Adjusting Torso Height with MoveIt!}
+
+The node optimizes object detection by adjusting the robot's torso height using MoveIt!.
+
+\subsection{Manipulating the Robot's Head}
+
+A \texttt{HeadMover} class manipulates the robot's head position to enhance object detection accuracy.
+
+\subsection{ROS Publishers and Message Handling}
+
+Several ROS publishers and message handlers coordinate object detection processes.
+
+\subsection{Completion Signal to Node B}
+
+After setup tasks, \texttt{nodeA.cpp} signals \texttt{nodeB.cpp} to commence operations, ensuring synchronized task execution.
+
+\subsection{Implementation Details}
+
+Key steps in implementing \texttt{nodeA.cpp} include setting up the service client, managing navigation goals, obstacle navigation logic, torso adjustment, head movement control, ROS communication setup, and task completion signaling.
+
+
+\section{Node B: Object Detection and Localization}
+
+The primary objective of \texttt{nodeB.cpp} is to identify and determine the positions of objects on the table using AprilTag detections. This node processes visual information from the robot's camera and communicates results to \texttt{nodeC.cpp} for manipulation tasks.
+
+\subsection{AprilTag Detection}
+
+\texttt{nodeB.cpp} subscribes to \texttt{tag\_detections} to receive AprilTag detections, ensuring robust object identification and localization.
+
+\subsection{Tag Callback Function}
+
+The core \texttt{tagCallback} function transforms detected poses into the global map frame, accurately mapping object positions.
+
+\subsection{Storing Object Coordinates}
+
+Detected object coordinates are stored in the \texttt{objects} array, enabling \texttt{nodeB.cpp} to manage and track identified objects.
+
+\subsection{Initiation by Node A}
+
+\texttt{nodeB.cpp} waits for a signal from \texttt{nodeA.cpp} to begin object detection, ensuring synchronization with robot positioning.
+
+\subsection{Requesting Object Order}
+
+Upon initiation, \texttt{nodeB.cpp} requests object pick order via \texttt{/human\_objects\_srv}, enhancing system adaptability.
+
+\subsection{Multi-View Object Detection}
+
+Utilizing a multi-view strategy, \texttt{nodeB.cpp} ensures comprehensive object detection across different viewpoints.
+
+\subsection{Preparing Data for Node C}
+
+Finalized object information is encapsulated in \texttt{tiago\_iaslab\_simulation::pick\_info} messages for \texttt{nodeC.cpp}, facilitating object manipulation tasks.
+
+\subsection{Implementation Details}
+
+Implementation steps include setting up subscription to \texttt{tag\_detections}, processing detections with \texttt{tagCallback}, storing coordinates, signal-based initiation, human operator interaction for object order, multi-view detection strategy, and message preparation for \texttt{nodeC.cpp}.
+
+
+\section{Node C: Object Manipulation and Placement}
+
+The primary objective of \texttt{nodeC.cpp} is to manipulate and place objects identified by \texttt{nodeB.cpp} with precision and accuracy.
+
+\subsection{Receiving Data from Node B}
+
+\texttt{nodeC.cpp} receives \texttt{tiago\_iaslab\_simulation::pick\_info} messages from \texttt{nodeB.cpp} containing object coordinates and pick order.
+
+\subsection{Planning Scene Interface}
+
+To ensure collision-free manipulation, \texttt{nodeC.cpp} sets up a planning scene interface with collision objects derived from \texttt{nodeB.cpp}.
+
+\subsection{Determining Optimal Table Side}
+
+Based on object positions, \texttt{nodeC.cpp} decides the optimal side of the table to start operations for efficient object handling.
+
+\subsection{Pick-and-Place Cycle}
+
+\texttt{nodeC.cpp} executes a cycle of pick-and-place operations:
+\begin{enumerate}
+    \item Transforming coordinates to \texttt{base\_footprint} frame.
+    \item Positioning end effector above the object.
+    \item Attaching and lifting the object safely.
+    \item Transporting the object to a visible position using movement clients.
+    \item Locating target tables with laser scan data and placing the object.
+    \item Preparing for subsequent object manipulations.
+\end{enumerate}
+
+\subsection{Laser Scan and Table Detection}
+
+Utilizes laser scan data to detect and locate tables in the room, converting polar coordinates to Cartesian for accurate positioning.
+
+\subsection{Implementation Details}
+
+Implementation includes data reception from \texttt{nodeB.cpp}, planning scene setup, optimal positioning determination, pick-and-place execution, and laser scan processing for table detection.
+
+\end{document}

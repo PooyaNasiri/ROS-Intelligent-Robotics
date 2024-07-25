@@ -1,0 +1,8 @@
+#goal
+float32[] pose_b
+---
+#result
+float32[] obstacles
+---
+#feedback
+string status

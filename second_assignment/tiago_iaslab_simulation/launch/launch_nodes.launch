@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<launch>
+  
+  <node name="nodeA" pkg="tiago_iaslab_simulation" type="nodeA" output="screen" />
+  
+  <node name="nodeB" pkg="tiago_iaslab_simulation" type="nodeB" output="screen" />
+  
+  <node name="nodeC" pkg="tiago_iaslab_simulation" type="nodeC" output="screen" />
+  
+</launch>
